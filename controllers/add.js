@@ -1,10 +1,11 @@
 const { contractAddress } = require('../constants/info')
+let { tasks } = require('../stores/db')
 
 module.exports = {
   addNewGems: async (ctx, next) => {
     let kind = ctx.request.body.kind
     let salt = ctx.request.body.salt
-    console.log(`kind: ${kind}, salt: ${salt}`)
+    console.log(`Received: kind: ${kind}, salt: ${salt}`)
 
     const web3 = ctx.state.web3
     const contract = ctx.state.contract
@@ -22,6 +23,7 @@ module.exports = {
           reason: `estimated gas exceed 150k (actual ${result})`,
         }
       } else {
+        tasks.push({ salt, kind })
         ctx.body = {
           success: true,
           estimated_gas: result,
@@ -35,17 +37,6 @@ module.exports = {
     }
 
     ctx.status = 200
-    // const transaction = contract.methods.mine(kind, salt);
-    // const options = {
-    //   to: CONTRACT_ADDRESS,
-    //   data: transaction.encodeABI(),
-    //   gas: await transaction.estimateGas({ from: account.address }),
-    //   gasPrice: await web3.eth.getGasPrice(), // or use some predefined value
-    // };
-    // const signed = await web3.eth.accounts.signTransaction(options, privateKey);
-    // const receipt = await web3.eth.sendSignedTransaction(signed.rawTransaction);
-
-    // console.log(receipt);
     return next()
   },
 }

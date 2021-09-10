@@ -13,14 +13,10 @@ app.use(bodyParser())
 const Web3 = require('web3')
 const abis = require('./constants/abis')
 const { contractAddress } = require('./constants/info')
-
-const privateKey = process.env.PRIVATE_KEY
+const web3 = new Web3(process.env.INFURA_KEY)
+const contract = new web3.eth.Contract(abis, contractAddress)
 
 app.use((ctx, next) => {
-  const web3 = new Web3(process.env.INFURA_KEY)
-  // const account = web3.eth.accounts.privateKeyToAccount(privateKey)
-  const contract = new web3.eth.Contract(abis, contractAddress)
-
   ctx.state.web3 = web3
   ctx.state.contract = contract
   return next()
@@ -31,3 +27,30 @@ router.post('/add', manager.addNewGems)
 app.use(router.routes()).use(router.allowedMethods())
 app.listen(3000)
 console.log('listening on port 3000')
+
+// loop check
+let { tasks } = require('./stores/db')
+
+const privateKey = process.env.PRIVATE_KEY
+const account = web3.eth.accounts.privateKeyToAccount(privateKey)
+
+setInterval(async () => {
+  if (tasks && tasks.length > 0) {
+    const { kind, salt } = tasks[0]
+    console.log(`Found Task: salt: ${salt}, kind: ${kind}`)
+    const transaction = contract.methods.mine(kind, salt)
+    const options = {
+      to: contractAddress,
+      data: transaction.encodeABI(),
+      gas: await transaction.estimateGas({ from: account.address }),
+      gasPrice: await web3.eth.getGasPrice(),
+    }
+    const signed = await web3.eth.accounts.signTransaction(options, privateKey)
+    const receipt = await web3.eth.sendSignedTransaction(signed.rawTransaction)
+    console.log(receipt)
+
+    tasks.shift()
+  } else {
+    console.log('Waiting for incoming tasks.')
+  }
+}, 30000)
