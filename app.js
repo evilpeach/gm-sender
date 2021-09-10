@@ -10,10 +10,7 @@ const app = new Koa()
 app.use(Logger())
 app.use(bodyParser())
 
-router.post('/add', manager.addNewGems, async (ctx, next) => {
-  ctx.status = 200
-  next()
-})
+router.post('/add', manager.addNewGems)
 
 app.use(router.routes())
 app.listen(3000)
