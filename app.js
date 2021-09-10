@@ -38,6 +38,8 @@ setInterval(async () => {
   if (tasks && tasks.length > 0) {
     const { kind, salt } = tasks[0]
     console.log(`Found Task: salt: ${salt}, kind: ${kind}`)
+    tasks.shift()
+
     const transaction = contract.methods.mine(kind, salt)
     const options = {
       to: contractAddress,
@@ -47,10 +49,8 @@ setInterval(async () => {
     }
     const signed = await web3.eth.accounts.signTransaction(options, privateKey)
     const receipt = await web3.eth.sendSignedTransaction(signed.rawTransaction)
-    console.log(receipt)
-
-    tasks.shift()
+    console.log(`txHash: ${receipt.transactionHash}`)
   } else {
-    console.log('Waiting for incoming tasks.')
+    // console.log('Waiting for incoming tasks.')
   }
-}, 30000)
+}, 100)
