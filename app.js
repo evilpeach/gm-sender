@@ -46,7 +46,7 @@ setInterval(async () => {
         to: contractAddress,
         data: transaction.encodeABI(),
         gas: await transaction.estimateGas({ from: account.address }),
-        gasPrice: await web3.eth.getGasPrice(),
+        gasPrice: (parseInt(await web3.eth.getGasPrice()) * 2).toString(),
       }
       const signed = await web3.eth.accounts.signTransaction(
         options,
