@@ -14,5 +14,10 @@
   },
   "scripts": {
     "start": "node app.js"
+  },
+  "prettier": {
+    "trailingComma": "all",
+    "semi": false,
+    "singleQuote": true
   }
 }
