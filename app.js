@@ -38,7 +38,7 @@ setInterval(async () => {
   if (tasks && tasks.length > 0) {
     const { kind, salt } = tasks[0]
     console.log(`Found Task: salt: ${salt}, kind: ${kind}`)
-    tasks = []
+    tasks.shift()
 
     try {
       const transaction = contract.methods.mine(kind, salt)
